@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\Uuid;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -13,6 +14,7 @@ class User extends Authenticatable
     use HasFactory;
     use Notifiable;
     use HasApiTokens;
+    use Uuid;
 
     /**
      * The attributes that are mass assignable.
@@ -42,5 +44,13 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'id' => 'string',
     ];
+
+    /**
+     * Set the ID attributes to not be incremental.
+     *
+     * @var boolean
+     */
+    public $incrementing = false;
 }
