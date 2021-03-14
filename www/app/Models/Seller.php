@@ -3,18 +3,12 @@
 namespace App\Models;
 
 use App\Models\Traits\Uuid;
-use App\Observers\UserObserver;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class Seller extends Model
 {
     use HasFactory;
-    use Notifiable;
-    use HasApiTokens;
     use Uuid;
 
     /*
@@ -28,13 +22,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'typeable_id',
-        'typeable_type'
-    ];
+    protected $fillable = ['cnpj'];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -42,8 +30,9 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'id',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -52,10 +41,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'id'                => 'string',
-        'typeable_id'       => 'string',
-        'typeable_type'     => 'string'
+        'id' => 'string'
     ];
 
     /**
@@ -72,20 +58,12 @@ class User extends Authenticatable
     */
 
     /**
-     * Get the child model (Customer or Seller).
-     */
-    public function typeable()
-    {
-        return $this->morphTo();
-    }
-
-    /**
-     * The "booted" method of the model.
+     * Return the respective Customer profile to User.
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    protected static function booted()
+    public function user()
     {
-        User::observe(UserObserver::class);
+        return $this->morphOne(User::class, 'typeable');
     }
 }
