@@ -47,13 +47,6 @@ class Seller extends Model
     ];
 
     /**
-     * The date attributes that should be cast to datetime types.
-     *
-     * @var array
-     */
-    protected $dates = ['deleted_at'];
-
-    /**
      * Set the ID attributes to not be incremental.
      *
      * @var boolean

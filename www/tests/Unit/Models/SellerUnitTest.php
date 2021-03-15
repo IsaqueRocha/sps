@@ -43,7 +43,7 @@ class SellerUnitTest extends TestCase
             \Illuminate\Database\Eloquent\Factories\HasFactory::class,
         ];
 
-        $categoryTraits = array_keys(class_uses(Customer::class));
+        $categoryTraits = array_keys(class_uses(Seller::class));
 
         $this->assertEqualsCanonicalizing($traits, $categoryTraits);
     }
@@ -60,6 +60,6 @@ class SellerUnitTest extends TestCase
 
     public function testIncrementingAttribute()
     {
-        $this->assertFalse($this->user->getIncrementing());
+        $this->assertFalse($this->seller->getIncrementing());
     }
 }

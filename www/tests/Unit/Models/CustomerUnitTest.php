@@ -60,6 +60,6 @@ class CustomerUnitTest extends TestCase
 
     public function testIncrementingAttribute()
     {
-        $this->assertFalse($this->user->getIncrementing());
+        $this->assertFalse($this->customer->getIncrementing());
     }
 }
