@@ -29,7 +29,7 @@ class AuthControllerTest extends TestCase
         ];
     }
 
-    public function testCustomerResgister()
+    public function testCustomerResgistration()
     {
         $sendData = $this->data + [
             'type' => 'customer',
@@ -65,7 +65,7 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(Response::HTTP_OK);
     }
 
-    public function testSellerResgister()
+    public function testSellerResgistration()
     {
         $sendData = $this->data + [
             'type' => 'seller',

@@ -17,7 +17,8 @@ class CreateCustomersTable extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->uuid('id');
-            $table->string('cpf');
+            $table->string('cpf')->unique();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Models\Traits\Uuid;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Seller extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     use Uuid;
 
     /*
@@ -43,6 +45,13 @@ class Seller extends Model
     protected $casts = [
         'id' => 'string'
     ];
+
+    /**
+     * The date attributes that should be cast to datetime types.
+     *
+     * @var array
+     */
+    protected $dates = ['deleted_at'];
 
     /**
      * Set the ID attributes to not be incremental.

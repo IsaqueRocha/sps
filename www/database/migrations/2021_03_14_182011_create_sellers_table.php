@@ -17,7 +17,8 @@ class CreateSellersTable extends Migration
     {
         Schema::create('sellers', function (Blueprint $table) {
             $table->uuid('id');
-            $table->string('cnpj');
+            $table->string('cnpj')->unique();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

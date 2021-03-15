@@ -6,6 +6,7 @@ use App\Models\Traits\Uuid;
 use App\Observers\UserObserver;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -15,6 +16,7 @@ class User extends Authenticatable
     use HasFactory;
     use Notifiable;
     use HasApiTokens;
+    use SoftDeletes;
     use Uuid;
 
     /*
@@ -53,6 +55,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'deleted_at'        => 'datetime',
         'id'                => 'string',
         'typeable_id'       => 'string',
         'typeable_type'     => 'string'
