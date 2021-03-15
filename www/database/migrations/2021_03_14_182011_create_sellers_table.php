@@ -16,7 +16,7 @@ class CreateSellersTable extends Migration
     public function up()
     {
         Schema::create('sellers', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->uuid('id')->primary();
             $table->string('cnpj')->unique();
             $table->softDeletes();
             $table->timestamps();

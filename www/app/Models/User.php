@@ -82,8 +82,6 @@ class User extends Authenticatable
         parent::delete();
     }
 
-
-
     /*
     |--------------------------------------------------------------------------
     | RELATIONSHIPS
@@ -96,6 +94,11 @@ class User extends Authenticatable
     public function typeable()
     {
         return $this->morphTo();
+    }
+
+    public function wallet()
+    {
+        $this->hasOne(Wallet::class);
     }
 
     /**

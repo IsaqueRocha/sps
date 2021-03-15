@@ -18,6 +18,7 @@ class UserTableSeeder extends Seeder
         $customer = Customer::create([
             'cpf' => '177.132.774-04'
         ]);
+
         User::factory()->create([
             'name' => 'Isaque Rocha',
             'email' => 'isaquerocha@gmail.com',
@@ -25,5 +26,7 @@ class UserTableSeeder extends Seeder
             'typeable_id' => $customer->id,
             'typeable_type' => get_class($customer)
         ]);
+
+        User::factory(9)->create();
     }
 }

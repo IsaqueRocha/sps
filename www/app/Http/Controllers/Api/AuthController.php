@@ -7,8 +7,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
-use Exception;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -39,8 +37,6 @@ class AuthController extends Controller
 
         $type = '\\App\\Models\\' . ucfirst($validatedFields['type']);
         $typeable = $type::create($validatedFields);
-
-        // dd(get_class($typeable));
 
         $user = User::create($validatedFields + [
             'typeable_id' => $typeable->id,

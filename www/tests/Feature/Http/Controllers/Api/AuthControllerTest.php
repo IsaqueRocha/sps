@@ -174,12 +174,12 @@ class AuthControllerTest extends TestCase
         $sendData = ['type' => 'customer', 'cpf' => '110.100.010-11'];
         $response = $this->json('POST', self::STORE, $sendData);
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonFragment([ 'cpf' => ['CPF inválido'] ]);
+            ->assertJsonFragment(['cpf' => ['CPF inválido']]);
 
         $sendData = ['type' => 'customer', 'cpf' => '17713277404'];
         $response = $this->json('POST', self::STORE, $sendData);
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonFragment([ 'cpf' => ['Formato inválido para CPF'] ]);
+            ->assertJsonFragment(['cpf' => ['Formato inválido para CPF']]);
 
         // TEST CNPJ
         $sendData = ['type' => 'seller', 'cnpj' => ''];
@@ -188,13 +188,12 @@ class AuthControllerTest extends TestCase
         $sendData = ['type' => 'seller', 'cnpj' => '11.111.111/0001-11'];
         $response = $this->json('POST', self::STORE, $sendData);
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonFragment([ 'cnpj' => ['CNPJ inválido'] ]);
+            ->assertJsonFragment(['cnpj' => ['CNPJ inválido']]);
 
         $sendData = ['type' => 'seller', 'cnpj' => '91901769/000136'];
         $response = $this->json('POST', self::STORE, $sendData);
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonFragment([ 'cnpj' => ['Formato inválido para CNPJ'] ]);
-
+            ->assertJsonFragment(['cnpj' => ['Formato inválido para CNPJ']]);
     }
 
     public function assertRegisterInvalidation($sendData, $rule, $field, $ruleParams = [])
