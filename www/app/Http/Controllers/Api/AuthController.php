@@ -19,9 +19,9 @@ class AuthController extends Controller
         $this->rules = [
             'name'                  => 'required|min:3|max:255',
             'email'                 => 'required|email|unique:users',
-            'password'              => 'required',
+            'password'              => 'required|min:6',
             'confirmation_password' => 'required|same:password',
-            'type'                  => 'required|in:customer,seller'
+            'type'                  => 'required|in:seller,customer',
         ];
     }
     /**
@@ -93,10 +93,8 @@ class AuthController extends Controller
             case '\\App\\Models\\Seller':
                 $this->rules += ['cnpj' => 'required|cnpj|formato_cnpj'];
                 break;
-
             default:
-                throw new Exception("Error Processing Request: Nor CPF or CNPJ found", 1);
-
+                return null;
                 break;
         }
     }
