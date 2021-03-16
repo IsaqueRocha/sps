@@ -3,22 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use DB;
-use App\Models\User;
+use Exception;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
+use App\Repositories\TransactionRepository;
 
 class TransactionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    private $repo;
+
+    public function __construct(TransactionRepository $repo)
     {
-        //
+        $this->repo = $repo;
     }
 
     /**
@@ -31,71 +29,33 @@ class TransactionController extends Controller
     {
         $this->authorize('create', Transaction::class);
 
-        $validatedData = $this->validate($request, [
+        $data = $this->validate($request, [
             'payer' => 'required',
             'payee' => 'required',
             'value' => 'required|numeric'
         ]);
 
-        /** @var User $payer */
-        $payer = User::find($request['payer']);
-        $payer->refresh();
+        $payerWallet = $this->repo->getUserWallet($data['payer']);
+        $payeeWallet = $this->repo->getUserWallet($data['payee']);
 
-        /** @var User $payee */
-        $payee = User::find($request['payee']);
-        $payee->refresh();
-
-        $payerWallet = $payer->wallet;
-        $payeeWallet = $payee->wallet;
-
-        $payerWallet->funds -= $request['value'];
-        $payeeWallet->funds += $request['value'];
+        $this->repo->addFunds($payeeWallet, $data['value']);
+        $this->repo->removeFunds($payerWallet, $data['value']);
 
         try {
-            DB::beginTransaction();
-            $payerWallet->save();
-            $payeeWallet->save();
-            $obj = Transaction::create($validatedData);
-            DB::commit();
+            if ($this->repo->getPermission()) {
+                DB::beginTransaction();
+                $payerWallet->save();
+                $payeeWallet->save();
+                $obj = Transaction::create($data);
+                DB::commit();
+            } else {
+                throw new Exception("Error Processing Permission Request", 1);
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
 
         return response()->json(['data' => $obj], Response::HTTP_CREATED);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Transaction  $transaction
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Transaction $transaction)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Transaction  $transaction
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Transaction $transaction)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Transaction  $transaction
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Transaction $transaction)
-    {
-        //
     }
 }

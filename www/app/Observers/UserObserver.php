@@ -30,6 +30,7 @@ class UserObserver
     public function deleted(User $user)
     {
         $user->wallet->delete();
+        $user->typeable->delete();
     }
 
     /**

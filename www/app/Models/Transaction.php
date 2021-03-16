@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Traits\Uuid;
+use App\Observers\TransactionObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -59,5 +60,21 @@ class Transaction extends Model
     public function userPayee()
     {
         return $this->belongsTo(User::class, 'payee', 'id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    |
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        Transaction::observe(TransactionObserver::class);
     }
 }
