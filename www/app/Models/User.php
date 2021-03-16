@@ -88,6 +88,8 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
+    protected $with = ['wallet'];
+
     /**
      * Get the child model (Customer or Seller).
      */
@@ -98,7 +100,7 @@ class User extends Authenticatable
 
     public function wallet()
     {
-        $this->hasOne(Wallet::class);
+        return $this->hasOne(Wallet::class);
     }
 
     /**

@@ -23,6 +23,8 @@ class UserTest extends TestCase
     {
         parent::setUp();
 
+        User::boot();
+
         $this->faker = $this->makeFaker('pt_BR');
 
         $this->testKeys = [
@@ -62,14 +64,22 @@ class UserTest extends TestCase
 
         $customer = Customer::create(['cpf' => $this->faker->cpf]);
 
-        $user = User::factory()->create([
+        $user = User::create([
+            'name' => $name = $this->faker->name,
+            'email' => $email = $this->faker->safeEmail,
+            'password' => bcrypt('password'),
             'typeable_id' => $customer->id,
             'typeable_type' => get_class($customer)
         ]);
 
+        $user->refresh();
+
         $this->assertTrue(Uuid::isValid($user->id));
         $this->assertEquals($customer->id, $user->typeable_id);
         $this->assertEquals(Customer::class, $user->typeable_type);
+        $this->assertEquals($name, $user->name);
+        $this->assertEquals($email, $user->email);
+        $this->assertEquals(0.0, $user->wallet->funds);
     }
 
     public function testUpdate()

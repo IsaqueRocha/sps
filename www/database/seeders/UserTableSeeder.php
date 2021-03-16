@@ -19,14 +19,12 @@ class UserTableSeeder extends Seeder
             'cpf' => '177.132.774-04'
         ]);
 
-        User::factory()->create([
+        User::create([
             'name' => 'Isaque Rocha',
             'email' => 'isaquerocha@gmail.com',
             'password' => bcrypt('password'),
             'typeable_id' => $customer->id,
             'typeable_type' => get_class($customer)
         ]);
-
-        User::factory(9)->create();
     }
 }

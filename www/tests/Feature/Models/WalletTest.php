@@ -36,16 +36,7 @@ class WalletTest extends TestCase
 
     public function testList()
     {
-        User::factory(10)
-            ->make()
-            ->each(function (User $user) {
-                $user->save();
-
-                Wallet::create([
-                    'funds' => 0.0,
-                    'user_id' => $user->id
-                ]);
-            });
+        User::factory(10)->create();
         $wallets = Wallet::all();
         $walletKeys = array_keys($wallets->first()->getAttributes());
 
@@ -58,10 +49,7 @@ class WalletTest extends TestCase
         $user = User::factory()->create();
         $user->refresh();
 
-        $wallet = Wallet::create([
-            'funds' => 0.0,
-            'user_id' => $user->id
-        ]);
+        $wallet = $user->wallet;
 
         $this->assertTrue(Uuid::isValid($wallet->id));
     }
