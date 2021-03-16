@@ -103,6 +103,16 @@ class User extends Authenticatable
         return $this->hasOne(Wallet::class);
     }
 
+    public function payments()
+    {
+        return $this->hasMany(Transaction::class, 'payer_id');
+    }
+
+    public function incomes()
+    {
+        return $this->hasMany(Transaction::class, 'payee_id');
+    }
+
     /**
      * The "booted" method of the model.
      *

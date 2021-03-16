@@ -44,4 +44,20 @@ class Transaction extends Model
      * @var boolean
      */
     public $incrementing = false;
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
+
+    public function userPayer()
+    {
+        return $this->belongsTo(User::class, 'payer', 'id');
+    }
+
+    public function userPayee()
+    {
+        return $this->belongsTo(User::class, 'payee', 'id');
+    }
 }

@@ -16,12 +16,13 @@ class CreateTransactionsTable extends Migration
     public function up()
     {
         Schema::create('transactions', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->double('value');
             $table->uuid('payer');
             $table->uuid('payee');
             $table->foreign('payer')->references('id')->on('users');
             $table->foreign('payee')->references('id')->on('users');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
