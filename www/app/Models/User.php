@@ -88,8 +88,6 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
-    protected $with = ['wallet'];
-
     /**
      * Get the child model (Customer or Seller).
      */

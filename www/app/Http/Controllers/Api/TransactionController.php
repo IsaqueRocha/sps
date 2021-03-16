@@ -1,9 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use DB;
+use App\Models\User;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Http\Controllers\Controller;
 
 class TransactionController extends Controller
 {
@@ -25,7 +29,40 @@ class TransactionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->authorize('create', Transaction::class);
+
+        $validatedData = $this->validate($request, [
+            'payer' => 'required',
+            'payee' => 'required',
+            'value' => 'required|numeric'
+        ]);
+
+        /** @var User $payer */
+        $payer = User::find($request['payer']);
+        $payer->refresh();
+
+        /** @var User $payee */
+        $payee = User::find($request['payee']);
+        $payee->refresh();
+
+        $payerWallet = $payer->wallet;
+        $payeeWallet = $payee->wallet;
+
+        $payerWallet->funds -= $request['value'];
+        $payeeWallet->funds += $request['value'];
+
+        try {
+            DB::beginTransaction();
+            $payerWallet->save();
+            $payeeWallet->save();
+            $obj = Transaction::create($validatedData);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return response()->json(['data' => $obj], Response::HTTP_CREATED);
     }
 
     /**
