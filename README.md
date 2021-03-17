@@ -8,7 +8,7 @@
 
 ## Rodando o projeto
 
-Certifique-se de ter instalado o docker e docker-compose instalados, e em seguida no terminal digite:
+Certifique-se de ter o docker e docker-compose instalados, e em seguida no terminal digite:
 
 ```
 docker-compose up --build
