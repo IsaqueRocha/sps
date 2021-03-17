@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Models;
 
-use App\Models\User;
-use App\Models\Wallet;
 use Tests\TestCase;
+use App\Models\User;
+use Ramsey\Uuid\Uuid;
+use App\Models\Wallet;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Ramsey\Uuid\Uuid;
 
 class WalletTest extends TestCase
 {

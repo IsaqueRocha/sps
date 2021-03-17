@@ -7,15 +7,13 @@ use App\Models\User;
 use App\Models\Seller;
 use App\Models\Customer;
 use Illuminate\Http\Response;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\TestInvalidation;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Testing\TestResponse;
-use Lang;
 
 class AuthControllerTest extends TestCase
 {
     use DatabaseMigrations;
+    use TestInvalidation;
 
     private $data;
 
@@ -50,7 +48,9 @@ class AuthControllerTest extends TestCase
     | TEST FUNCTIONS
     |--------------------------------------------------------------------------
     */
+
     // ! POSITIVE TESTS
+
     public function testCustomerResgistration()
     {
         $sendData = $this->data + [
@@ -82,8 +82,27 @@ class AuthControllerTest extends TestCase
         ];
 
         $response = $this->json('POST', '/api/login', $sendData);
-
         $response->assertStatus(Response::HTTP_OK);
+    }
+
+    public function testCustomerCannotLogin()
+    {
+        $customer = Customer::create([
+            'cpf' => '177.132.774-04'
+        ]);
+        $user = User::factory()->create([
+            'typeable_id' => $customer->id,
+            'typeable_type' => get_class($customer)
+        ]);
+
+        $sendData = [
+            'email'    => $user->email,
+            'password' => 'wrongpassword'
+        ];
+
+        $response = $this->json('POST', '/api/login', $sendData);
+
+        $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
     public function testSellerResgistration()
@@ -118,6 +137,25 @@ class AuthControllerTest extends TestCase
 
         $response = $this->json('POST', '/api/login', $sendData);
         $response->assertStatus(Response::HTTP_OK);
+    }
+
+    public function testSellerCannotLogin()
+    {
+        $seller = Seller::create([
+            'cnpj' => '91.901.769/0001-36'
+        ]);
+        $user = User::factory()->create([
+            'typeable_id' => $seller->id,
+            'typeable_type' => get_class($seller)
+        ]);
+
+        $sendData = [
+            'email' => $user->email,
+            'password' => 'wrongpassword'
+        ];
+
+        $response = $this->json('POST', '/api/login', $sendData);
+        $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
     // !NEGATIVE TESTS
@@ -167,43 +205,35 @@ class AuthControllerTest extends TestCase
         $sendData = ['type' => 'user',];
         $this->assertRegisterInvalidation($sendData, 'in', 'type');
 
-        // TEST CPF
-        $sendData = ['type' => 'customer', 'cpf' => ''];
-        $this->assertRegisterInvalidation($sendData, 'required', 'cpf');
-
-        $sendData = ['type' => 'customer', 'cpf' => '110.100.010-11'];
-        $response = $this->json('POST', self::STORE, $sendData);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonFragment(['cpf' => ['CPF inválido']]);
-
-        $sendData = ['type' => 'customer', 'cpf' => '17713277404'];
-        $response = $this->json('POST', self::STORE, $sendData);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonFragment(['cpf' => ['Formato inválido para CPF']]);
-
-        // TEST CNPJ
-        $sendData = ['type' => 'seller', 'cnpj' => ''];
-        $this->assertRegisterInvalidation($sendData, 'required', 'cnpj');
-
-        $sendData = ['type' => 'seller', 'cnpj' => '11.111.111/0001-11'];
-        $response = $this->json('POST', self::STORE, $sendData);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonFragment(['cnpj' => ['CNPJ inválido']]);
-
-        $sendData = ['type' => 'seller', 'cnpj' => '91901769/000136'];
-        $response = $this->json('POST', self::STORE, $sendData);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonFragment(['cnpj' => ['Formato inválido para CNPJ']]);
+        $this->assertInvalidDoc('customer', 'cpf', '110.100.010-11', '17713277404');
+        $this->assertInvalidDoc('seller', 'cnpj', '11.111.111/0001-11', '91901769/000136');
     }
 
-    public function assertRegisterInvalidation($sendData, $rule, $field, $ruleParams = [])
-    {
-        $response = $this->json('POST', self::STORE, $sendData);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $fieldName = str_replace('_', ' ', $field);
-        $response->assertJsonFragment([
-            $field => [Lang::get("validation.{$rule}", ['attribute' => $fieldName] + $ruleParams)]
-        ]);
+    /*
+    |--------------------------------------------------------------------------
+    | HELPER FUNCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    private function assertInvalidDoc($userType, $docType, $docInvalid, $docUnformated)
+    {
+        $sendData = ['type' => $userType, $docType => ''];
+        $this->assertRegisterInvalidation($sendData, 'required', $docType);
+
+        $sendData = ['type' => $userType, $docType => $docInvalid];
+        $response = $this->json('POST', self::STORE, $sendData);
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonFragment([$docType => [strtoupper($docType) . ' inválido']]);
+
+        $sendData = ['type' => $userType, $docType => $docUnformated];
+        $response = $this->json('POST', self::STORE, $sendData);
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonFragment([$docType => ['Formato inválido para ' . strtoupper($docType)]]);
+    }
+
+    protected function routeStore()
+    {
+        return self::STORE;
     }
 }

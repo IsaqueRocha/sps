@@ -2,24 +2,54 @@
 
 namespace Tests\Feature\Http\Controllers\Api;
 
+use Mockery;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Seller;
 use App\Models\Customer;
+use Illuminate\Http\Request;
 use Laravel\Sanctum\Sanctum;
 use Illuminate\Http\Response;
+use Tests\Traits\TestInvalidation;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Http\Controllers\Api\TransactionController;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class TransactionControllerTest extends TestCase
 {
     use DatabaseMigrations;
     use RefreshDatabase;
+    use TestInvalidation;
+    use WithFaker;
+
+    /*
+    |--------------------------------------------------------------------------
+    | URL CONSTANTS
+    |--------------------------------------------------------------------------
+    */
+
+    private const STORE  = 'api/transaction';
+
+/*
+    |--------------------------------------------------------------------------
+    | CLASS VARIABLES
+    |--------------------------------------------------------------------------
+    */
 
     /** @var User $customer */
     private $customer;
     /** @var User $seller */
     private $seller;
+
+    private $sendData;
+
+    /*
+    |--------------------------------------------------------------------------
+    | TEST CONFIGURATION
+    |--------------------------------------------------------------------------
+    */
 
     protected function setUp(): void
     {
@@ -54,19 +84,27 @@ class TransactionControllerTest extends TestCase
         $this->seller->refresh();
         $this->seller->wallet->funds = 500.00;
         $this->seller->wallet->save();
+
+        $this->sendData = [
+            'payer' => $this->customer->id,
+            'payee' => $this->seller->id,
+            'value' => 100.00
+        ];
     }
+
+     /*
+    |--------------------------------------------------------------------------
+    | TEST FUNCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    // ! POSITIVE TESTS
 
     public function testCustomerCanCreate()
     {
         Sanctum::actingAs($this->customer);
 
-        $sendData = [
-            'payer' => $this->customer->id,
-            'payee' => $this->seller->id,
-            'value' => 100.00
-        ];
-
-        $response = $this->json('POST', 'api/transaction', $sendData);
+        $response = $this->json('POST', self::STORE, $this->sendData);
         $response->assertStatus(Response::HTTP_CREATED);
 
         $this->customer->wallet->refresh();
@@ -80,13 +118,7 @@ class TransactionControllerTest extends TestCase
     {
         Sanctum::actingAs($this->seller);
 
-        $sendData = [
-            'payer' => $this->seller->id,
-            'payee' => $this->customer->id,
-            'value' => 100.00
-        ];
-
-        $response = $this->json('POST', 'api/transaction', $sendData);
+        $response = $this->json('POST', self::STORE, $this->sendData);
         $response->assertStatus(Response::HTTP_FORBIDDEN);
 
         $this->customer->wallet->refresh();
@@ -94,5 +126,69 @@ class TransactionControllerTest extends TestCase
 
         $this->assertEquals(500.00, $this->seller->wallet->funds);
         $this->assertEquals(1000.00, $this->customer->wallet->funds);
+    }
+
+    public function testRollBack()
+    {
+
+        $controller = Mockery::mock(TransactionController::class)
+                            ->makePartial()
+                            ->shouldAllowMockingProtectedMethods();
+        $controller->shouldReceive('validate')->andReturn($this->sendData);
+        $controller->shouldReceive('getPermission')->andReturn(false);
+
+        $request = Mockery::mock(Request::class);
+
+        $hasError = false;
+        try {
+            $controller->store($request);
+        } catch (AuthorizationException $e) {
+            $this->assertEquals(500.00, $this->seller->wallet->funds);
+            $this->assertEquals(1000.00, $this->customer->wallet->funds);
+            $hasError = true;
+        }
+
+        $this->assertTrue($hasError);
+    }
+
+    // ! NEGATIVE TESTS
+
+    public function testInvalidData()
+    {
+        Sanctum::actingAs($this->customer);
+
+        $data = array_merge($this->sendData, ['payer' => '']);
+        $this->assertRegisterInvalidation($data, 'required', 'payer');
+
+        $data = array_merge($this->sendData, ['payer' => '7662f117-a1c1-46d1-917e']);
+        $this->assertRegisterInvalidation($data, 'uuid', 'payer');
+
+        $data = array_merge($this->sendData, ['payee' => '']);
+        $this->assertRegisterInvalidation($data, 'required', 'payee');
+
+        $data = array_merge($this->sendData, ['payee' => '7662f117-a1c1-46d1-917e']);
+        $this->assertRegisterInvalidation($data, 'uuid', 'payee');
+
+        $data = array_merge($this->sendData, ['value' => '']);
+        $this->assertRegisterInvalidation($data, 'required', 'value');
+
+        $data = array_merge($this->sendData, ['value' => -10.0]);
+        $response = $this->json('POST', self::STORE, $data);
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
+
+        $data = array_merge($this->sendData, ['value' => 0.0]);
+        $response = $this->json('POST', self::STORE, $data);
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | HELPER FUNCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    protected function routeStore()
+    {
+        return self::STORE;
     }
 }

@@ -44,7 +44,7 @@ class AuthController extends Controller
         ]);
 
         $data['token'] = $user->createToken('MyApp')->plainTextToken;
-        $data['user'] = $user;
+        $data['user'] = $user->refresh();
 
         return response()->json(['data' => $data], Response::HTTP_CREATED);
     }
