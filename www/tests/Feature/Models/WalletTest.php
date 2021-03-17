@@ -48,7 +48,7 @@ class WalletTest extends TestCase
         $wallets = Wallet::all();
         $walletKeys = array_keys($wallets->first()->getAttributes());
 
-        $this->assertCount(10, $wallets);
+        $this->assertCount(11, $wallets);
         $this->assertEqualsCanonicalizing($this->testKeys, $walletKeys);
     }
 
