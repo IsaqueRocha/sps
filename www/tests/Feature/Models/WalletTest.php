@@ -18,6 +18,9 @@ class WalletTest extends TestCase
 
     private $testKeys;
 
+    private $user;
+    private $wallet;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,6 +35,11 @@ class WalletTest extends TestCase
             'updated_at',
             'deleted_at',
         ];
+
+        $this->user = User::factory()->create();
+        $this->user->refresh();
+
+        $this->wallet = $this->user->wallet;
     }
 
     public function testList()
@@ -46,11 +54,25 @@ class WalletTest extends TestCase
 
     public function testCreate()
     {
-        $user = User::factory()->create();
-        $user->refresh();
+        $this->assertTrue(Uuid::isValid($this->wallet->id));
+        $this->assertEquals(0.0, $this->wallet->funds);
+    }
 
-        $wallet = $user->wallet;
+    public function testUpdate()
+    {
+        $this->assertEquals(0.0, $this->wallet->funds);
 
-        $this->assertTrue(Uuid::isValid($wallet->id));
+        $this->wallet->funds = 1000.0;
+        $this->wallet->save();
+
+        $newWallet = Wallet::find($this->wallet->id);
+
+        $this->assertEquals(1000.0, $newWallet->funds);
+    }
+
+    public function testDelete()
+    {
+        $this->user->delete();
+        $this->assertDatabaseMissing('wallets', $this->wallet->toArray());
     }
 }
