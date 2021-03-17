@@ -11,6 +11,15 @@ use App\Repositories\TransactionRepository;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 
+/**
+ * @OA\Server(url="http://localhost/api"),
+ * @OA\Info(title="Sistema de pagamento simplificado", version="0.0.1")
+ * @OA\SecurityScheme(
+ *     type="http",
+ *     scheme="bearer",
+ *     securityScheme="bearerAuth",
+ * )
+ */
 class TransactionController extends Controller
 {
     private $repo;
@@ -21,6 +30,32 @@ class TransactionController extends Controller
     }
 
     /**
+     *  @OA\Post(
+     *     tags={"Transaction"},
+     *     summary="Store a newly created resource in storage.",
+     *     description="store a new transaction on database",
+     *     path="/transaction",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="payer", type="string", description="the payer id"),
+     *             @OA\Property(property="payee", type="string", description="the payee id"),
+     *             @OA\Property(property="value", type="string", description="a numeric float value"),
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="201", description="New transaction created"
+     *     ),
+     *     @OA\Response(
+     *         response="400", description="Bad Request"
+     *     ),
+     *     @OA\Response(
+     *         response="401", description="Unauthorized"
+     *     ),
+     * )
+     *
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -54,7 +89,7 @@ class TransactionController extends Controller
                 $obj = Transaction::create($data);
                 DB::commit();
             } else {
-                throw new Exception("Error Processing Permission Request", 1);
+                throw new Exception("Error Processing Permission Request", 1); //NOSONAR
             }
         } catch (\Exception $e) {
             DB::rollBack();

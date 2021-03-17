@@ -22,7 +22,29 @@ class AuthController extends Controller
             'type'                  => 'required|in:seller,customer',
         ];
     }
+
     /**
+     * @OA\Post(
+     *     tags={"Auth"},
+     *     summary="Store a newly created resource in storage.",
+     *     description="create a new user",
+     *     path="/register",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string"),
+     *             @OA\Property(property="confirmation_password", type="string"),
+     *             @OA\Property(property="type", type="string"),
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="201", description="New user created"
+     *     )
+     * )
+     *
      * Handle the registration process.
      *
      * @param  \Illuminate\Http\Request $request
@@ -50,6 +72,24 @@ class AuthController extends Controller
     }
 
     /**
+     *  @OA\Post(
+     *     tags={"Auth"},
+     *     summary="Store a newly created resource in storage.",
+     *     description="create a new user",
+     *     path="/login",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string"),
+     *       )
+     *     ),
+     *     @OA\Response(
+     *         response="200", description="User Authenticated"
+     *     )
+     * )
+     *
      * Handle an authentication attempt.
      *
      * @param  \Illuminate\Http\Request $request
