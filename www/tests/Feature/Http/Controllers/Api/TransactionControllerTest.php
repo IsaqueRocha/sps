@@ -15,7 +15,11 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Http\Controllers\Api\TransactionController;
+use App\Models\Wallet;
+use Exception;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+
+use function PHPUnit\Framework\throwException;
 
 class TransactionControllerTest extends TestCase
 {
@@ -100,7 +104,7 @@ class TransactionControllerTest extends TestCase
 
     // ! POSITIVE TESTS
 
-    public function testCustomerCanCreate()
+    public function testCustomerCanTransfer()
     {
         Sanctum::actingAs($this->customer);
 
@@ -114,7 +118,7 @@ class TransactionControllerTest extends TestCase
         $this->assertEquals(600.00, $this->seller->wallet->funds);
     }
 
-    public function testSellerCannotCreate()
+    public function testSellerCannotTransfer()
     {
         Sanctum::actingAs($this->seller);
 
@@ -130,6 +134,7 @@ class TransactionControllerTest extends TestCase
 
     public function testRollBack()
     {
+        Sanctum::actingAs($this->customer);
 
         $controller = Mockery::mock(TransactionController::class)
                             ->makePartial()
@@ -139,16 +144,10 @@ class TransactionControllerTest extends TestCase
 
         $request = Mockery::mock(Request::class);
 
-        $hasError = false;
-        try {
-            $controller->store($request);
-        } catch (AuthorizationException $e) {
-            $this->assertEquals(500.00, $this->seller->wallet->funds);
-            $this->assertEquals(1000.00, $this->customer->wallet->funds);
-            $hasError = true;
-        }
-
-        $this->assertTrue($hasError);
+        /** @var JsonResponse $response */
+        $response = $controller->store($request);
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->status());
+        $this->assertEquals('{"error":"Error Processing Permission Request"}', $response->content());
     }
 
     // ! NEGATIVE TESTS

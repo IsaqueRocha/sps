@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Repositories\TransactionRepository;
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class TransactionController extends Controller
@@ -39,25 +40,25 @@ class TransactionController extends Controller
             abort(Response::HTTP_BAD_REQUEST);
         }
 
-        $payerWallet = $this->repo->getUserWallet($data['payer']);
-        $payeeWallet = $this->repo->getUserWallet($data['payee']);
-
-        $this->repo->addFunds($payeeWallet, $data['value']);
-        $this->repo->removeFunds($payerWallet, $data['value']);
-
         try {
             if ($this->getPermission()) {
+                $payerWallet = $this->repo->getUserWallet($data['payer']);
+                $payeeWallet = $this->repo->getUserWallet($data['payee']);
+
+                $this->repo->addFunds($payeeWallet, $data['value']);
+                $this->repo->removeFunds($payerWallet, $data['value']);
+
                 DB::beginTransaction();
                 $payerWallet->save();
                 $payeeWallet->save();
                 $obj = Transaction::create($data);
                 DB::commit();
             } else {
-                throw new AuthorizationException("Error Processing Permission Request", 1);
+                throw new Exception("Error Processing Permission Request", 1);
             }
-        } catch (AuthorizationException $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
-            throw $e;
+            return response()->json(['error' => $e->getMessage()], Response::HTTP_UNAUTHORIZED);
         }
 
         return response()->json(['data' => $obj], Response::HTTP_CREATED);
