@@ -11,15 +11,6 @@ use App\Repositories\TransactionRepository;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 
-/**
- * @OA\Server(url="http://localhost/api"),
- * @OA\Info(title="Sistema de pagamento simplificado", version="0.0.1")
- * @OA\SecurityScheme(
- *     type="http",
- *     scheme="bearer",
- *     securityScheme="bearerAuth",
- * )
- */
 class TransactionController extends Controller
 {
     private $repo;

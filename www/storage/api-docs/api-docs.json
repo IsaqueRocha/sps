@@ -85,6 +85,26 @@
                 }
             }
         },
+        "/profile": {
+            "get": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Retrieve profile information",
+                "description": "Get profile information",
+                "operationId": "App\\Http\\Controllers\\Api\\ProfileController::index",
+                "responses": {
+                    "200": {
+                        "description": "Get the authenticated user"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/transaction": {
             "post": {
                 "tags": [
