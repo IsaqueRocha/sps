@@ -33,11 +33,13 @@ class AuthController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="name", type="string"),
-     *             @OA\Property(property="email", type="string"),
-     *             @OA\Property(property="password", type="string"),
-     *             @OA\Property(property="confirmation_password", type="string"),
-     *             @OA\Property(property="type", type="string"),
+     *             @OA\Property(property="name", type="string", description="nome do usuário"),
+     *             @OA\Property(property="email", type="string", description="e-mail do usuário"),
+     *             @OA\Property(property="password", type="string", description="senha"),
+     *             @OA\Property(property="confirmation_password", type="string", description="confirmação da senha"),
+     *             @OA\Property(property="type", type="string", description="tipo do usuário: customer ou seller"),
+     *             @OA\Property(property="cpf", type="string", description="documento necessário caso type seja customer"),
+     *             @OA\Property(property="cnpj", type="string", description="documento necessário caso type seja seller"),
      *       )
      *     ),
      *     @OA\Response(

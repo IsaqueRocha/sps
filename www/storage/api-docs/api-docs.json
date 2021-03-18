@@ -25,18 +25,31 @@
                             "schema": {
                                 "properties": {
                                     "name": {
+                                        "description": "nome do usuário",
                                         "type": "string"
                                     },
                                     "email": {
+                                        "description": "e-mail do usuário",
                                         "type": "string"
                                     },
                                     "password": {
+                                        "description": "senha",
                                         "type": "string"
                                     },
                                     "confirmation_password": {
+                                        "description": "confirmação da senha",
                                         "type": "string"
                                     },
                                     "type": {
+                                        "description": "tipo do usuário: customer ou seller",
+                                        "type": "string"
+                                    },
+                                    "cpf": {
+                                        "description": "documento necessário caso type seja customer",
+                                        "type": "string"
+                                    },
+                                    "cnpj": {
+                                        "description": "documento necessário caso type seja seller",
                                         "type": "string"
                                     }
                                 },
